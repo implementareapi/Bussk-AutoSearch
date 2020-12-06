@@ -7,7 +7,7 @@ Magento2 AutoSearch
 
 Creare folder Bussk/AutoSearch in fisierul "code"
 
-Rulare comenzi :
+<h1>Rulare comenzi </h1>
 
 bin/magento setup:upgrade
 
