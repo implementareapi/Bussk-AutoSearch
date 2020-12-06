@@ -1,7 +1,8 @@
 # Bussk-AutoSearch
 Magento2 AutoSearch
 
-Instalare
+<h1>Instalare</h1>
+
 --> [Magento2 folder]/app/code.
 
 Creare folder Bussk/AutoSearch in fisierul "code"
