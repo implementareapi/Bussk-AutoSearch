@@ -1,0 +1,267 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+?>
+<?php
+/** @var $block \Magento\Framework\View\Element\Template */
+/** @var $helper \Magento\Search\Helper\Data */
+$helper = $this->helper(\Magento\Search\Helper\Data::class);
+?>
+<div class="block block-search">
+    <div class="block block-title"><strong><?= /* @escapeNotVerified */ __('Cauta') ?></strong></div>
+    <div class="block block-content">
+        <form class="form minisearch" id="search_mini_form" action="<?= /* @escapeNotVerified */ $helper->getResultUrl() ?>" method="get">
+            <div class="field search">
+                <label class="label" for="search" data-role="minisearch-label">
+                    <span><?= /* @escapeNotVerified */ __('Cauta') ?></span>
+                </label>
+                <div class="control">
+                	<div id="searchCategories">
+						<select>
+							<option value="all">Tot</option>
+							<?php 
+								foreach($this->getCategories() as $category){
+									?>
+										<option value="<?php echo $category->getId(); ?>"><?php echo $category->getName(); ?></option>
+									<?php 
+								}
+							?>
+						</select>
+					</div>
+                    <input id="search"
+                           type="text"
+                           name="<?= /* @escapeNotVerified */ $helper->getQueryParamName() ?>"
+                           value="<?= /* @escapeNotVerified */ $helper->getEscapedQueryText() ?>"
+                           placeholder="<?= /* @escapeNotVerified */ __('Search entire store here...') ?>"
+                           class="input-text"
+                           maxlength="<?= /* @escapeNotVerified */ $helper->getMaxQueryLength() ?>"
+                           autocomplete="off"/>
+                </div>
+            </div>
+            <div class="actions">
+                <button type="submit"
+                        title="<?= $block->escapeHtml(__('Cauta')) ?>"
+                        class="action search">
+                    <span><?= /* @escapeNotVerified */ __('Cauta') ?></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+require(['jquery', 'domReady!'], function($){
+	var searchControlElement = $('#search_mini_form .field.search .control').first();
+	searchControlElement.append('<div id="busskAutoSearch" style="display:none;"><ul></ul><button type="submit"><?= /* @escapeNotVerified */ __('Vezi toate rezultatele') ?></button></div>');
+	$('#bussk_autosearch').remove();
+	$('#search').unbind();
+	$(window).click(function() {
+		$('#busskAutoSearch').hide();
+	});
+	$('.block.block-search').click(function(event){
+	    event.stopPropagation();
+	});
+	$('#search').bind('input', function(){
+  		var searchInput = $(this);
+	  	var searchInputValue = searchInput.val().replace("/^[a-zA-Z0-9 _-]+$/i", "");
+	  	if(searchInputValue.length >=3){
+	  		url = "<?php echo $this->getAjaxUrl(); ?>";
+	  		$.ajax({
+	           	type: "POST",
+	           	url: url,
+	           	data: {query: searchInputValue, category: $('#searchCategories select').first().val()},
+	           	success: function(data){
+	           		console.log(data);
+	           		var searchResultHtml = '';
+	           		var size = Object.keys(data).length;
+	           		for(let i=1; i<=size; i++){
+	           			searchResultHtml += '<li data-url="'+data[i]['url']+'">';
+	           			searchResultHtml += '<div class="sa-image"><img src="'+data[i]['thumbnail']+'"></div>';
+	           			searchResultHtml += '<div class="sa-prop">';
+		           			searchResultHtml += '<div class="sa-title"><p>'+data[i]['name']+'</p></div>';
+		           			if(data[i]['rating']){
+		           				searchResultHtml += '<div class="sa-rating"><div class="rating-summary"><div class="rating-result" title="'+data[i]['rating']+'%"><span style="width:'+data[i]['rating']+'%"><span>'+data[i]['rating']+'%</span></span></div></div></div>';
+		           			}
+		           			searchResultHtml += '<div class="sa-price"><p>'+data[i]['price']+'<p></div>';
+		           		searchResultHtml += '</div>';
+	           			searchResultHtml += '</li>';
+	           			$('#busskAutoSearch ul').first().html(searchResultHtml);
+	           		}
+	           		$( "#busskAutoSearch ul li" ).on( "click", function() {
+				  		window.location = $(this).data('url');
+					});
+	           		if(size > 0){
+	           			$('#busskAutoSearch').show();
+					}else{
+						$('#busskAutoSearch').hide();
+					}
+				},
+	            error: function (data) {
+	                console.log(data);
+	            }
+	  		});
+	  	}else{
+	  		$('#busskAutoSearch').hide();
+	  	}
+	});
+	$("#search").on("focus", function(){
+    	var searchInput = $(this);
+	  	var searchInputValue = searchInput.val().replace("/^[a-zA-Z0-9 _-]+$/i", "");
+	  	if(searchInputValue.length >=3){
+	  		url = "<?php echo $this->getAjaxUrl(); ?>";
+	  		$.ajax({
+	           	type: "POST",
+	           	url: url,
+	           	data: {query: searchInputValue, category: $('#searchCategories select').first().val()},
+	           	success: function(data){
+	           		console.log(data);
+	           		var searchResultHtml = '';
+	           		var size = Object.keys(data).length;
+	           		for(let i=1; i<=size; i++){
+	           			searchResultHtml += '<li data-url="'+data[i]['url']+'">';
+	           			searchResultHtml += '<div class="sa-image"><img src="'+data[i]['thumbnail']+'"></div>';
+	           			searchResultHtml += '<div class="sa-prop">';
+		           			searchResultHtml += '<div class="sa-title"><p>'+data[i]['name']+'</p></div>';
+		           			if(data[i]['rating']){
+		           				searchResultHtml += '<div class="sa-rating"><div class="rating-summary"><div class="rating-result" title="'+data[i]['rating']+'%"><span style="width:'+data[i]['rating']+'%"><span>'+data[i]['rating']+'%</span></span></div></div></div>';
+		           			}
+		           			searchResultHtml += '<div class="sa-price"><p>'+data[i]['price']+'<p></div>';
+		           		searchResultHtml += '</div>';
+	           			searchResultHtml += '</li>';
+	           			$('#busskAutoSearch ul').first().html(searchResultHtml);
+	           		}
+	           		if(size > 0){
+	           			$('#busskAutoSearch').show();
+					}else{
+						$('#busskAutoSearch').hide();
+					}
+					$( "#busskAutoSearch ul li" ).on( "click", function() {
+				  		window.location = $(this).data('url');
+					});
+				},
+	            error: function (data) {
+	                console.log(data);
+	            }
+	  		});
+	  	}else{
+	  		$('#busskAutoSearch').hide();
+	  	}
+	});
+	$("#searchCategories select").first().on("change", function(){
+		var searchInput = $('#search');
+	  	var searchInputValue = searchInput.val().replace("/^[a-zA-Z0-9 _-]+$/i", "");
+	  	if(searchInputValue.length >=3){
+	  		url = "<?php echo $this->getAjaxUrl(); ?>";
+	  		$.ajax({
+	           	type: "POST",
+	           	url: url,
+	           	data: {query: searchInputValue, category: $('#searchCategories select').first().val()},
+	           	success: function(data){
+	           		console.log(data);
+	           		var searchResultHtml = '';
+	           		var size = Object.keys(data).length;
+	           		for(let i=1; i<=size; i++){
+	           			searchResultHtml += '<li data-url="'+data[i]['url']+'">';
+	           			searchResultHtml += '<div class="sa-image"><img src="'+data[i]['thumbnail']+'"></div>';
+	           			searchResultHtml += '<div class="sa-prop">';
+		           			searchResultHtml += '<div class="sa-title"><p>'+data[i]['name']+'</p></div>';
+		           			if(data[i]['rating']){
+		           				searchResultHtml += '<div class="sa-rating"><div class="rating-summary"><div class="rating-result" title="'+data[i]['rating']+'%"><span style="width:'+data[i]['rating']+'%"><span>'+data[i]['rating']+'%</span></span></div></div></div>';
+		           			}
+		           			searchResultHtml += '<div class="sa-price"><p>'+data[i]['price']+'<p></div>';
+		           		searchResultHtml += '</div>';
+	           			searchResultHtml += '</li>';
+	           			$('#busskAutoSearch ul').first().html(searchResultHtml);
+	           		}
+	           		if(size > 0){
+	           			$('#busskAutoSearch').show();
+					}else{
+						$('#busskAutoSearch').hide();
+					}
+					$( "#busskAutoSearch ul li" ).on( "click", function() {
+				  		window.location = $(this).data('url');
+					});
+				},
+	            error: function (data) {
+	                console.log(data);
+	            }
+	  		});
+	  	}else{
+	  		$('#busskAutoSearch').hide();
+	  	}
+	});
+});
+</script>
+<style type="text/css">
+#searchCategories {
+	display: inline-block;
+	float: left;
+	width: 30%;
+}
+#search {
+	display: inline-block;
+	position: relative;
+	left: unset;
+	width: 70%;
+	float: right;
+}
+.block-search {
+	
+}
+#busskAutoSearch {
+	position: absolute;
+	top: 32px;
+	border: 1px solid #cccccc;
+	background-color: white;
+	width: 100%;
+}
+#busskAutoSearch button {
+	margin: 10px;
+}
+#busskAutoSearch ul {
+	margin: 0;
+	padding: 5px;
+	list-style: none;
+}
+#busskAutoSearch ul li {
+	padding: 4px;
+	border-bottom: 1px solid #cccccc;
+	margin: 0;
+	cursor: pointer;
+}
+#busskAutoSearch ul li:hover, #busskAutoSearch ul li:last-child:hover {
+	border: 1px solid #cccccc;
+}
+#busskAutoSearch ul li:last-child {
+    border-bottom: unset;
+}
+#busskAutoSearch .sa-image {
+	display: inline-block;
+	max-width: 30%;
+}
+#busskAutoSearch .sa-rating {
+	margin-top: 10px;
+}
+#busskAutoSearch .sa-prop {
+	display: inline-block;
+	width: 70%;
+	float: right;
+}
+#busskAutoSearch .sa-title {
+	margin-top: 10px;
+}
+#busskAutoSearch .sa-price {
+	margin-top: 10px;
+	padding: 10px;
+}
+@media all and (min-width: 768px), print {
+	.block-search {
+		width: 400px;
+		padding-left: 0;
+	}
+}
+</style>
